@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "text-to-speech-api"
+version = "0.1.0"
+description = "Based on the questions and responses during the interview, the task involves creating a text-to-speech (TTS) endpoint with specific requirements: 1. **Input Handling**: The endpoint must accept both plain text and SSML (Speech Synthesis Markup Language) formatted input. This dual-input capability allows for a broader range of speech expressions, from simple text conversion to complex speech patterns that include pauses, emphasis, and audio adjustments. 2. **Speech Conversion**: The core functionality is to convert the provided input text into natural-sounding speech audio. It involves selecting a TTS library that can handle both input types efficiently and produce high-quality audio output. Based on the interview, potential libraries include `gTTS` for simplicity and access to Google's TTS engine, `pyttsx3` for offline capabilities, or `aws-polly` for advanced features and natural voice options. 3. **Customization Features**: The endpoint must offer customization options for voice (e.g., gender, accent), speed, pitch, and other parameters. This level of customization allows users to tailor the speech output to match their preferences or application requirements, enhancing the overall user experience. 4. **Output Format**: The generated audio should be returned in a specified format, with MP3 being the preferred format due to its balance of sound quality and file size. This flexibility ensures that the TTS service can be used in a variety of applications, including those that require specific audio formats for compatibility or quality reasons. **Technical Implementation**: The service will be implemented using Python and FastAPI, leveraging FastAPI's asynchronous capabilities to handle speech synthesis operations efficiently. PostgreSQL, in conjunction with Prisma as the ORM, will be used to store and manage user preferences and possibly cache generated speech files for frequent requests. Special consideration will be given to security, error handling, and integration with the frontend to ensure a robust and scalable service."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+pyjwt = "^2.1.0"
+bcrypt = "^3.2.0"
+fastapi = "^0.68.0"
+gtts = "^2.2.3"
+prisma = "*"
+pydantic = "*"
+python-dotenv = "^0.19.0"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

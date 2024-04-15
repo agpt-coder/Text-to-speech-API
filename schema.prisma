@@ -1,0 +1,132 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+}
+
+enum LogLevel {
+  INFO
+  WARNING
+  ERROR
+}
+
+model User {
+  id             String           @id @default(dbgenerated("gen_random_uuid()"))
+  email          String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  lastLogin      DateTime?
+  role           Role             @default(USER)
+  preferences    UserPreference[]
+  speechRequests SpeechRequest[]
+  subscriptions  Subscription[]
+
+  @@map("users")
+}
+
+model UserPreference {
+  id       String @id @default(dbgenerated("gen_random_uuid()"))
+  userId   String
+  voice    String
+  speed    Float
+  pitch    Float
+  language String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model SpeechRequest {
+  id           String        @id @default(dbgenerated("gen_random_uuid()"))
+  userId       String
+  inputText    String
+  inputFormat  InputFormat
+  outputFormat OutputFormat
+  status       ProcessStatus
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  processedAt  DateTime?
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  speechResult SpeechResult?
+
+  @@map("speech_requests")
+}
+
+model SpeechResult {
+  id              String        @id @default(dbgenerated("gen_random_uuid()"))
+  speechRequestId String        @unique
+  audioFilePath   String
+  audioFileSize   Int
+  speechRequest   SpeechRequest @relation(fields: [speechRequestId], references: [id], onDelete: Cascade)
+
+  @@map("speech_results")
+}
+
+model Subscription {
+  id        String             @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  plan      SubscriptionPlan
+  status    SubscriptionStatus
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Log {
+  id       String   @id @default(dbgenerated("gen_random_uuid()"))
+  loggedAt DateTime @default(now())
+  level    LogLevel
+  message  String
+
+  @@map("logs")
+}
+
+enum Role {
+  USER
+  SUBSCRIBER
+  ADMIN
+}
+
+enum InputFormat {
+  TEXT
+  SSML
+}
+
+enum OutputFormat {
+  MP3
+  WAV
+}
+
+enum ProcessStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+}
+
